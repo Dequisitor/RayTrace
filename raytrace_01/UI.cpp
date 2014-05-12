@@ -49,17 +49,32 @@ void UI::ShowTab()
 	}
 }
 
+LRESULT CALLBACK BtnProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+{
+	switch (msg)
+	{
+	case WM_COMMAND:
+		MessageBoxA(NULL, "ász-e", "nein", MB_OK);
+		break;
+
+	default:
+		DefWindowProc(hwnd, msg, lParam, wParam);
+	}
+
+	return 0;
+}
+
 int UI::RenderUI(HWND hwnd)
 {
 	hDisplay = CreateWindow(L"Static", L"", WS_CHILD | WS_BORDER | WS_VISIBLE, 5, 5, 640, 480, hwnd, NULL, NULL, NULL);
-	CreateWindowW(L"Button", L"Render", WS_CHILD | WS_VISIBLE, 1090, 450, 80, 24, hwnd, (HMENU)IDB_RENDER, NULL, NULL);
-	CreateWindowW(L"Button", L"Export to BMP", WS_CHILD | WS_VISIBLE, 650, 450, 120, 24, hwnd, (HMENU)IDB_CREATEBMP, NULL, NULL);
+	CreateWindowW(L"Button", L"Render", WS_CHILD | WS_VISIBLE, 1100, 460, 80, 24, hwnd, (HMENU)IDB_RENDER, NULL, NULL);
+	CreateWindowW(L"Button", L"Export to BMP", WS_CHILD | WS_VISIBLE, 650, 460, 120, 24, hwnd, (HMENU)IDB_CREATEBMP, NULL, NULL);
 	EnableWindow(GetDlgItem(hwnd, IDB_CREATEBMP), false);
 
 	//create tab handles
-	hTab	= CreateWindowW(L"SysTabControl32", L"", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS, 650, 5, 523, 440, hwnd, NULL, NULL, NULL);
-	hTab0	= CreateWindowW(L"SysTabControl32", L"", WS_CHILD | WS_CLIPSIBLINGS, 0, 22, 523, 418, hTab, NULL, NULL, NULL);
-	hTab1	= CreateWindowW(L"SysTabControl32", L"", WS_CHILD | WS_CLIPSIBLINGS, 0, 22, 523, 418, hTab, NULL, NULL, NULL);
+	hTab	= CreateWindowExW(WS_EX_CONTROLPARENT, L"SysTabControl32", L"", WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS, 650, 5, 530, 450, hwnd, NULL, NULL, NULL);
+	hTab0	= CreateWindowExW(WS_EX_CONTROLPARENT, L"SysTabControl32", L"", WS_CHILD | WS_CLIPSIBLINGS, 0, 22, 530, 428, hTab, NULL, NULL, NULL);
+	hTab1	= CreateWindowExW(WS_EX_CONTROLPARENT, L"SysTabControl32", L"", WS_CHILD | WS_CLIPSIBLINGS, 0, 22, 530, 428, hTab, NULL, NULL, NULL);
 	ShowWindow(hTab0, SW_SHOW);
 	ShowWindow(hTab1, SW_HIDE);
 
@@ -72,9 +87,11 @@ int UI::RenderUI(HWND hwnd)
 	TabCtrl_InsertItem(hTab, 1, &tie);
 
 	//create tab0 content
-	CreateWindow(L"Button", L"Add", WS_CHILD | WS_VISIBLE, 5, 385, 80, 24, hTab0, (HMENU)IDB_ADDOBJECT, NULL, NULL);
-	CreateWindow(L"Button", L"Remove", WS_CHILD | WS_VISIBLE, 90, 385, 80, 24, hTab0, (HMENU)IDB_DELETEOBJECT, NULL, NULL);
-	hList = CreateWindowExW(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_CHECKBOXES, WC_LISTVIEWW, L"", WS_CHILD | WS_BORDER | WS_VISIBLE | LVS_REPORT, 5, 10, 510, 370, hTab0, NULL, NULL, NULL);
+	HWND btn01 = CreateWindowEx(WS_EX_CONTROLPARENT, L"Button", L"Add", WS_CHILD | WS_VISIBLE, 5, 396, 80, 24, hTab0, (HMENU)IDB_ADDOBJECT, GetModuleHandle(NULL), NULL);
+	HWND btn02 = CreateWindowEx(WS_EX_CONTROLPARENT, L"Button", L"Remove", WS_CHILD | WS_VISIBLE, 90, 396, 80, 24, hTab0, (HMENU)IDB_DELETEOBJECT, NULL, NULL);
+	SetWindowLong(btn01, GWL_WNDPROC, (LONG)BtnProc);
+
+	hList = CreateWindowExW(LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES | LVS_EX_CHECKBOXES, WC_LISTVIEWW, L"", WS_CHILD | WS_BORDER | WS_VISIBLE | LVS_REPORT, 5, 10, 515, 380, hTab0, NULL, NULL, NULL);
 	DWORD style = LVS_EX_FULLROWSELECT | LVS_EX_CHECKBOXES;
 	ListView_SetExtendedListViewStyle(hList, style);
 
@@ -149,7 +166,9 @@ void RenderThreadFunc(void* hwnd)
 	RayTrace::getInstance().Render();
 	SetWindowTextA((HWND)hwnd, "Rendering done");
 
-	SendMessage((HWND)hwnd, WM_PAINT, NULL, NULL);
+	//SendMessage((HWND)hwnd, WM_PAINT, NULL, NULL);
+	RedrawWindow((HWND)hwnd, NULL, NULL, RDW_INTERNALPAINT | RDW_ALLCHILDREN);
+	int error = GetLastError();
 }
 
 //winapi main message loop processing method
@@ -196,7 +215,6 @@ LRESULT CALLBACK UI::WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		if (RayTrace::getInstance().isReady()) 
 		{
 			RayTrace::getInstance().Draw(hDisplay);
-			//break;
 		}
 
 	default:
