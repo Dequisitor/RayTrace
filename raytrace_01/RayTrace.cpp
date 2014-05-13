@@ -26,12 +26,14 @@ RayTrace::~RayTrace()
 void RayTrace::Draw(HWND hwnd)
 {	
 	int error;
-	PAINTSTRUCT ps;
-	HDC hdc = BeginPaint(hwnd, &ps);
+	PAINTSTRUCT ps = {0};
+	HDC hdc = GetDC(hwnd);
 	error = GetLastError();
 	HDC hdcmem = CreateCompatibleDC(hdc);
 	error = GetLastError();
-	HBITMAP bitmap = CreateBitmap(width, height, 1, 32, screen);
+	HBITMAP bitmap = CreateCompatibleBitmap(hdc, width, height);
+	error = GetLastError();
+	int count = SetBitmapBits(bitmap, width*height*4, screen);
 	error = GetLastError();
 	SelectObject(hdcmem, bitmap);
 	error = GetLastError();
@@ -43,7 +45,7 @@ void RayTrace::Draw(HWND hwnd)
 	error = GetLastError();
 	DeleteObject(bitmap);
 	error = GetLastError();
-	EndPaint(hwnd, &ps);
+	DeleteDC(hdc);
 	error = GetLastError();
 }
 

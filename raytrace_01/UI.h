@@ -14,7 +14,6 @@ public:
 	void		ShowTab();
 
 	static LRESULT CALLBACK		WndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
-	static LRESULT CALLBACK		OriginalButtonProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	static LRESULT CALLBACK		ButtonProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 private:
 	UI();

@@ -16,6 +16,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nC
 	wc.hIcon			= LoadIcon(NULL, IDI_APPLICATION);
 	wc.hCursor			= LoadCursor(NULL, IDC_ARROW);
 	wc.lpszClassName	= L"myClass";
+	wc.hbrBackground	= (HBRUSH)(COLOR_3DFACE);
 	wc.lpfnWndProc		= (WNDPROC)(UI::WndProc);
 
 	if (!RegisterClass(&wc)) 
@@ -24,7 +25,8 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE hPrevInst, LPSTR lpCmdLine, int nC
 		return -1;
 	}
 
-	hwnd = CreateWindow(wc.lpszClassName, L"Main", WS_VISIBLE | WS_OVERLAPPEDWINDOW | WS_SYSMENU, CW_USEDEFAULT, CW_USEDEFAULT, 1200, 530, NULL, NULL, NULL, NULL);
+	hwnd = CreateWindow(wc.lpszClassName, L"Main", WS_OVERLAPPEDWINDOW | WS_VISIBLE | WS_SYSMENU, CW_USEDEFAULT, CW_USEDEFAULT, 1200, 530, NULL, (HMENU)NULL, NULL, NULL);
+	int error = GetLastError();
 	if (!hwnd) 
 	{
 		MessageBox(NULL, L"Window creation failed", L"Error", MB_OK);
