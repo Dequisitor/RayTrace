@@ -34,6 +34,7 @@ BOOL CALLBACK ObjectDialog::objDialogCallback(HWND hwnd, UINT msg, WPARAM wParam
 		break;
 
 	case WM_PAINT:
+
 		break;
 
 	case WM_COMMAND:
